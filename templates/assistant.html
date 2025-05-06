@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refugee Support Chatbot</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        #app {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #chat-container {
+            margin-top: 20px;
+        }
+        #chat-window {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #fff;
+            margin-bottom: 10px;
+        }
+        #chat-messages div {
+            margin: 10px 0;
+        }
+        .user-message {
+            text-align: right;
+            color: #007BFF;
+        }
+        .bot-message {
+            text-align: left;
+            color: #333;
+        }
+        #chat-form {
+            display: flex;
+        }
+        #user-query {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        /* Spinner Styles */
+        #loading-spinner {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007BFF;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Refugee Support Chatbot</h1>
+        <div id="chat-container">
+            <div id="chat-window">
+                <div id="chat-messages"></div>
+            </div>
+            <form id="chat-form">
+                <input type="text" id="user-query" placeholder="Type your question here..." autocomplete="off">
+                <button type="submit">Send</button>
+            </form>
+            <div id="loading-spinner">
+                <div class="spinner"></div>
+                <p>Processing your query, please wait...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const chatForm = document.getElementById("chat-form");
+            const chatWindow = document.getElementById("chat-messages");
+            const userQueryInput = document.getElementById("user-query");
+            const loadingSpinner = document.getElementById("loading-spinner");
+
+            chatForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const userQuery = userQueryInput.value.trim();
+                if (!userQuery) return;
+
+                // Display the user message
+                const userMessageDiv = document.createElement("div");
+                userMessageDiv.className = "user-message";
+                userMessageDiv.innerText = userQuery;
+                chatWindow.appendChild(userMessageDiv);
+
+                // Clear the input field
+                userQueryInput.value = "";
+
+                // Show the loading spinner
+                loadingSpinner.style.display = "block";
+
+                // Send the query to the Flask backend
+                try {
+                    const response = await fetch("/generate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ query: userQuery }),
+                    });
+
+                    const data = await response.json();
+
+                    // Hide the loading spinner
+                    loadingSpinner.style.display = "none";
+
+                    // Display the bot response
+                    const botMessageDiv = document.createElement("div");
+                    botMessageDiv.className = "bot-message";
+
+                    if (data.answer) {
+                        botMessageDiv.innerText = data.answer;
+                    } else {
+                        botMessageDiv.innerText = "Error: " + (data.error || "Unable to process your query.");
+                    }
+
+                    chatWindow.appendChild(botMessageDiv);
+                } catch (error) {
+                    loadingSpinner.style.display = "none";
+                    const errorDiv = document.createElement("div");
+                    errorDiv.className = "bot-message";
+                    errorDiv.innerText = "Error: Unable to connect to the server.";
+                    chatWindow.appendChild(errorDiv);
+                }
+
+                // Scroll to the latest message
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            });
+        });
+    </script>
+</body>
+</html>
