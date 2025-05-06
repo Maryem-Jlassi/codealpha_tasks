@@ -20,17 +20,13 @@ def text_to_speech(text, language="en-GB"):
         str: URL path to the audio file or None if error
     """
     try:
-        # Create audio directory if it doesn't exist
         os.makedirs("static/audio", exist_ok=True)
         
-        # Create a unique filename
         filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}.mp3"
         audio_path = os.path.join("static/audio", filename)
         
-        # Extract language code (e.g., 'en' from 'en-GB')
         lang_code = language.split('-')[0]
         
-        # Generate TTS
         tts = gTTS(text=text, lang=lang_code)
         tts.save(audio_path)
         
@@ -54,31 +50,25 @@ def process_speech_to_text(audio_data, language="en-GB"):
     try:
         recognizer = sr.Recognizer()
         
-        # Configure recognition settings
         recognizer.energy_threshold = 4000
         recognizer.dynamic_energy_threshold = True
         recognizer.pause_threshold = 0.8
         
-        # Save audio data to temporary file
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_audio:
             temp_audio.write(audio_data)
             temp_audio_path = temp_audio.name
         
         try:
-            # Load audio file and recognize speech
             with sr.AudioFile(temp_audio_path) as source:
-                # Adjust for ambient noise
                 recognizer.adjust_for_ambient_noise(source)
                 audio = recognizer.record(source)
                 
-                # Attempt to detect language if set to auto
                 if language.lower() == 'auto':
                     try:
                         result = recognizer.recognize_google(audio, show_all=True)
                         detected_language = result['alternative'][0].get('language', 'en-GB')
                         text = result['alternative'][0]['transcript']
                     except:
-                        # Fallback to specified language or English
                         detected_language = language
                         text = recognizer.recognize_google(audio, language=language)
                 else:
@@ -92,7 +82,6 @@ def process_speech_to_text(audio_data, language="en-GB"):
                 }
                 
         finally:
-            # Clean up temporary file
             try:
                 os.unlink(temp_audio_path)
             except Exception as e:
