@@ -1,0 +1,454 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Processor | SafeNest</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --turquoise: #2A9D8F;
+            --deep-turquoise: #264653;
+            --sand: #E9C46A;
+            --soft-sand: #F4E9CD;
+            --gentle-green: #8AB17D;
+            --coral: #E76F51;
+            --light-turquoise: #83C5BE;
+            --cream: #FEFAE0;
+            --off-white: #FAF0E6;
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+            background-color: var(--off-white);
+        }
+        .logo-container { position: relative; }
+        .logo { position: relative; width: 48px; height: 48px; }
+        .logo-base { position: absolute; width: 100%; height: 100%; border-radius: 35% 65% 60% 40% / 50% 50% 50% 50%; background: var(--turquoise); transform: rotate(-5deg); transition: all 0.5s ease; box-shadow: 0 4px 15px rgba(42, 157, 143, 0.3); }
+        .logo-wave { position: absolute; bottom: 0; left: 0; width: 100%; height: 40%; background: var(--deep-turquoise); border-radius: 30% 70% 100% 0% / 0% 100% 0% 100%; transform: rotate(-10deg) translateY(2px); }
+        .logo-roof { position: absolute; top: 0; left: 10%; width: 80%; height: 35%; background: var(--sand); clip-path: polygon(50% 0%, 100% 100%, 0% 100%); transform: translateY(-15%); }
+        .brand-name { font-size: 1.7rem; font-weight: 700; color: var(--deep-turquoise); letter-spacing: -0.5px; }
+        .brand-name span { color: var(--turquoise); }
+        .nav-link { position: relative; transition: all 0.3s ease; }
+        .nav-link.active, .nav-link:hover { color: var(--turquoise) !important; }
+        .tab-active { color: var(--turquoise); border-bottom: 2px solid var(--turquoise); background: #f7fafc; }
+        .tab-inactive { color: #888; background: transparent; }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .dropzone { border: 2px dashed var(--turquoise); transition: all 0.3s ease; }
+        .dropzone:hover, .dropzone.active { border-color: var(--deep-turquoise); background-color: rgba(42, 157, 143, 0.07); }
+        .document-preview { max-height: 400px; transition: all 0.5s ease; }
+        .loading-spinner { border: 5px solid rgba(42,157,143,0.15); border-radius: 50%; border-top: 5px solid var(--turquoise); width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <header class="bg-white shadow-md sticky top-0 z-50 transition-shadow duration-300">
+        <div class="container mx-auto px-4">
+            <nav class="py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="logo-container">
+                        <div class="logo">
+                            <div class="logo-base"></div>
+                            <div class="logo-wave"></div>
+                            <div class="logo-roof"></div>
+                        </div>
+                    </div>
+                    <div class="brand-name">Safe<span>Nest</span></div>
+                </div>
+                <div class="flex space-x-8">
+                    <a href="/" class="nav-link font-medium text-gray-600 hover:text-turquoise transition-colors py-2">Home</a>
+                    <a href="/translation" class="nav-link font-medium text-gray-600 hover:text-turquoise transition-colors py-2">Translation</a>
+                    <a href="/assistant" class="nav-link font-medium text-gray-600 hover:text-turquoise transition-colors py-2">Assistant</a>
+                    <a href="/document_processing" class="nav-link active font-medium text-turquoise hover:text-turquoise transition-colors py-2">Documents</a>
+                    <a href="/resource_map" class="nav-link font-medium text-gray-600 hover:text-turquoise transition-colors py-2">Ressources Map</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <select id="languageSelector" class="language-switcher font-medium text-sm focus:outline-none">
+                        <option value="en-GB">English</option>
+                        <option value="fr-FR">Français</option>
+                        <option value="ar-SA">العربية</option>
+                        <option value="es-ES">Español</option>
+                        <option value="fa-IR">فارسی</option>
+                        <option value="so-SO">Soomaali</option>
+                    </select>
+                </div>
+            </nav>
+        </div>
+    </header>
+    <main class="container mx-auto px-4 py-10">
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden mb-10">
+            <div class="bg-gradient-to-r from-turquoise to-deep-turquoise text-white px-8 py-6">
+                <h1 class="text-3xl font-bold mb-2">Document Processing Tool</h1>
+                <p class="text-lg opacity-90">Upload identity or medical documents for automatic field detection and analysis</p>
+            </div>
+            <div class="flex border-b bg-gray-50">
+                <button id="idTab" class="tab-active py-3 px-6 font-medium text-lg focus:outline-none rounded-tl-2xl">ID Documents</button>
+                <button id="medicalTab" class="tab-inactive py-3 px-6 font-medium text-lg focus:outline-none">Medical Documents</button>
+            </div>
+            <div class="p-8 bg-gray-50">
+                <div id="idFeatures" class="grid md:grid-cols-3 gap-6 mb-6">
+                    <div class="feature-card bg-white p-4 rounded-lg shadow transition duration-300">
+                        <div class="text-turquoise text-3xl mb-3"><i class="fas fa-id-card"></i></div>
+                        <h3 class="font-bold text-xl mb-2">ID Card Detection</h3>
+                        <p class="text-gray-600">AI-powered identification of key fields on identity documents</p>
+                    </div>
+                    <div class="feature-card bg-white p-4 rounded-lg shadow transition duration-300">
+                        <div class="text-turquoise text-3xl mb-3"><i class="fas fa-shield-alt"></i></div>
+                        <h3 class="font-bold text-xl mb-2">Privacy Protection</h3>
+                        <p class="text-gray-600">Secure processing with no data storage for confidentiality</p>
+                    </div>
+                    <div class="feature-card bg-white p-4 rounded-lg shadow transition duration-300">
+                        <div class="text-turquoise text-3xl mb-3"><i class="fas fa-language"></i></div>
+                        <h3 class="font-bold text-xl mb-2">Multi-Language Support</h3>
+                        <p class="text-gray-600">View detected fields in your preferred language</p>
+                    </div>
+                </div>
+                <div id="medicalFeatures" class="grid md:grid-cols-3 gap-6 mb-6 hidden">
+                    <div class="feature-card bg-white p-4 rounded-lg shadow transition duration-300">
+                        <div class="text-turquoise text-3xl mb-3"><i class="fas fa-notes-medical"></i></div>
+                        <h3 class="font-bold text-xl mb-2">Medical Document Analysis</h3>
+                        <p class="text-gray-600">Extract diagnoses, medications, and dosages from medical documents</p>
+                    </div>
+                    <div class="feature-card bg-white p-4 rounded-lg shadow transition duration-300">
+                        <div class="text-turquoise text-3xl mb-3"><i class="fas fa-user-shield"></i></div>
+                        <h3 class="font-bold text-xl mb-2">Enhanced Privacy</h3>
+                        <p class="text-gray-600">HIPAA-compliant processing for medical information security</p>
+                    </div>
+                    <div class="feature-card bg-white p-4 rounded-lg shadow transition duration-300">
+                        <div class="text-turquoise text-3xl mb-3"><i class="fas fa-pills"></i></div>
+                        <h3 class="font-bold text-xl mb-2">Medication Translation</h3>
+                        <p class="text-gray-600">Understand medication names and instructions in your language</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Upload Document</h2>
+                    <p class="text-gray-600 mb-4">Upload an image of an ID card or document for automatic field detection</p>
+                    <div id="dropzone" class="dropzone rounded-lg p-8 text-center cursor-pointer">
+                        <input type="file" id="fileInput" class="hidden" accept=".jpg,.jpeg,.png">
+                        <div class="text-gray-500">
+                            <i class="fas fa-cloud-upload-alt text-4xl mb-4 text-turquoise"></i>
+                            <p class="text-lg font-medium">Drag and drop files here</p>
+                            <p class="text-sm mt-2">or</p>
+                            <button id="browseButton" class="bg-turquoise hover:bg-deep-turquoise text-white px-4 py-2 rounded-md mt-3 transition duration-300">Browse Files</button>
+                            <p class="text-xs mt-4 text-gray-400">Supported formats: JPG, JPEG, PNG (Max 16MB)</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="resultsContainer" class="bg-white rounded-lg shadow p-6 mb-6 hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold text-gray-800">Résultats de l'analyse</h2>
+                        <div class="flex space-x-2">
+                            <button id="translateButton" class="bg-turquoise hover:bg-deep-turquoise text-white px-4 py-2 rounded-md transition duration-300">
+                                <i class="fas fa-language mr-2"></i>Traduire les champs
+                            </button>
+                            <button id="downloadButton" class="bg-gentle-green hover:bg-turquoise text-white px-4 py-2 rounded-md transition duration-300">
+                                <i class="fas fa-download mr-2"></i>Télécharger
+                            </button>
+                            <button id="newUploadButton" class="bg-deep-turquoise hover:bg-turquoise text-white px-4 py-2 rounded-md transition duration-300">
+                                <i class="fas fa-redo mr-2"></i>Nouveau téléchargement
+                            </button>
+                        </div>
+                    </div>
+                    <div id="processingIndicator" class="text-center py-12 hidden">
+                        <div class="loading-spinner"></div>
+                        <p class="text-gray-600 mt-4">Traitement du document, veuillez patienter...</p>
+                    </div>
+                    <div id="resultContent" class="hidden">
+                        <div class="md:flex gap-8">
+                            <div class="md:w-2/3 relative">
+                                <div class="bg-gray-100 p-2 rounded-lg relative overflow-hidden">
+                                    <img id="resultImage" class="w-full document-preview rounded-lg" src="" alt="Document traité">
+                                    <div id="annotationContainer" class="absolute top-0 left-0 w-full h-full"></div>
+                                </div>
+                            </div>
+                            <div class="md:w-1/3 mt-6 md:mt-0">
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h3 class="text-lg font-bold text-gray-800 mb-4">Champs détectés</h3>
+                                    <ul id="detectionsList" class="space-y-3"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="errorContainer" class="mt-4"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const dropzone = document.getElementById('dropzone');
+            const fileInput = document.getElementById('fileInput');
+            const browseButton = document.getElementById('browseButton');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const processingIndicator = document.getElementById('processingIndicator');
+            const resultContent = document.getElementById('resultContent');
+            const resultImage = document.getElementById('resultImage');
+            const detectionsList = document.getElementById('detectionsList');
+            const annotationContainer = document.getElementById('annotationContainer');
+            const errorContainer = document.getElementById('errorContainer');
+            const newUploadButton = document.getElementById('newUploadButton');
+            const downloadButton = document.getElementById('downloadButton');
+            const translateButton = document.getElementById('translateButton');
+            const languageSelector = document.getElementById('languageSelector');
+            const idTab = document.getElementById('idTab');
+            const medicalTab = document.getElementById('medicalTab');
+            const idFeatures = document.getElementById('idFeatures');
+            const medicalFeatures = document.getElementById('medicalFeatures');
+
+            // Vérification des éléments requis
+            const requiredElements = {
+                dropzone, fileInput, browseButton, resultsContainer, processingIndicator,
+                resultContent, resultImage, detectionsList, annotationContainer,
+                errorContainer, newUploadButton, downloadButton, translateButton,
+                languageSelector, idTab, medicalTab, idFeatures, medicalFeatures
+            };
+
+            for (const [name, element] of Object.entries(requiredElements)) {
+                if (!element) {
+                    console.error(`Élément requis non trouvé: ${name}`);
+                    return;
+                }
+            }
+
+            // Variables globales
+            let currentMode = 'id';
+            let lastDetections = [];
+            let translatedFields = false;
+
+            function handleFileUpload() {
+                const file = fileInput.files[0];
+                if (!file) return;
+                
+                // Afficher l'indicateur de traitement
+                resultsContainer.classList.remove('hidden');
+                processingIndicator.classList.remove('hidden');
+                resultContent.classList.add('hidden');
+                errorContainer.innerHTML = '';
+                
+                // Validation du type de fichier
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                if (!allowedTypes.includes(file.type)) {
+                    processingIndicator.classList.add('hidden');
+                    errorContainer.innerHTML = `
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Type de fichier invalide. Veuillez télécharger une image JPG, JPEG ou PNG.
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Validation de la taille du fichier (16MB max)
+                if (file.size > 16 * 1024 * 1024) {
+                    processingIndicator.classList.add('hidden');
+                    errorContainer.innerHTML = `
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Le fichier est trop volumineux. Taille maximale : 16MB.
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Choix de l'endpoint selon le type de document
+                const endpoint = currentMode === 'medical' ? '/process_medical_document' : '/process_id_document';
+                console.log(`Mode actuel: ${currentMode}, Endpoint: ${endpoint}`);
+                
+                const formData = new FormData();
+                formData.append('document', file);
+
+                fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    processingIndicator.classList.add('hidden');
+                    if (data.error) {
+                        errorContainer.innerHTML = `
+                            <div class="alert alert-danger" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                ${data.error}
+                            </div>
+                        `;
+                        console.error('Erreur serveur:', data.error);
+                    } else {
+                        displayResults(data);
+                    }
+                })
+                .catch(err => {
+                    processingIndicator.classList.add('hidden');
+                    errorContainer.innerHTML = `
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Erreur: ${err.message}. Veuillez réessayer.
+                        </div>
+                    `;
+                    console.error('Erreur de traitement:', err);
+                });
+            }
+
+            function displayResults(data) {
+                // Effacer les résultats précédents
+                detectionsList.innerHTML = '';
+                errorContainer.innerHTML = '';
+                
+                if (data.error) {
+                    errorContainer.innerHTML = `
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            ${data.error}
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (!data.detections || data.detections.length === 0) {
+                    errorContainer.innerHTML = `
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Aucun champ détecté dans le document. Veuillez essayer avec une image plus claire.
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Afficher le contenu des résultats
+                resultContent.classList.remove('hidden');
+                
+                // Stocker les détections pour la traduction
+                lastDetections = data.detections;
+                
+                // Afficher les détections
+                data.detections.forEach(detection => {
+                    const li = document.createElement('li');
+                    li.className = 'detection-item mb-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100';
+                    
+                    const fieldName = getFieldTranslation(detection.class);
+                    const confidence = Math.round(detection.confidence * 100);
+                    const textConfidence = Math.round(detection.text_confidence * 100);
+                    
+                    let content = `
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center">
+                                <span class="font-semibold text-turquoise text-lg">${fieldName}</span>
+                                <span class="ml-2 px-2 py-1 text-xs rounded-full ${getConfidenceClass(confidence)}">
+                                    ${confidence}% confiance
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    if (detection.text && detection.text !== "No text detected") {
+                        content += `
+                            <div class="mt-2 p-2 bg-gray-50 rounded">
+                                <div class="text-gray-700">
+                                    <span class="font-medium">Texte extrait:</span>
+                                    <span class="ml-2">${detection.text}</span>
+                                </div>
+                                <div class="mt-1 text-sm text-gray-500">
+                                    Confiance du texte: ${textConfidence}%
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    li.innerHTML = content;
+                    detectionsList.appendChild(li);
+                });
+                
+                // Afficher l'image annotée si disponible
+                if (data.annotated_image) {
+                    resultImage.src = data.annotated_image;
+                }
+            }
+
+            function getConfidenceClass(confidence) {
+                if (confidence >= 80) return 'bg-green-100 text-green-800';
+                if (confidence >= 50) return 'bg-yellow-100 text-yellow-800';
+                return 'bg-red-100 text-red-800';
+            }
+
+            function getFieldTranslation(field) {
+                const translations = {
+                    'age': 'Âge',
+                    'block': 'Bloc',
+                    'bp': 'Tension artérielle',
+                    'date': 'Date',
+                    'diagnosis': 'Diagnostic',
+                    'gender': 'Genre',
+                    'history': 'Historique médical',
+                    'medicine_dose': 'Dose du médicament',
+                    'medicine_name': 'Nom du médicament',
+                    'medicine_power': 'Puissance du médicament',
+                    'medicine_type': 'Type de médicament',
+                    'name': 'Nom du patient',
+                    'temp': 'Température',
+                    'weight': 'Poids',
+                    'weight-': 'Poids',
+                    'ww': 'Poids'
+                };
+                return translations[field] || field;
+            }
+
+            // Event Listeners
+            dropzone.addEventListener('click', () => fileInput.click());
+            browseButton.addEventListener('click', (e) => { e.preventDefault(); fileInput.click(); });
+            dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('active'); });
+            dropzone.addEventListener('dragleave', e => { e.preventDefault(); dropzone.classList.remove('active'); });
+            dropzone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropzone.classList.remove('active');
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileUpload();
+                }
+            });
+            fileInput.addEventListener('change', handleFileUpload);
+
+            // Gestion des onglets
+            idTab.addEventListener('click', () => {
+                currentMode = 'id';
+                idTab.classList.add('tab-active');
+                idTab.classList.remove('tab-inactive');
+                medicalTab.classList.remove('tab-active');
+                medicalTab.classList.add('tab-inactive');
+                idFeatures.classList.remove('hidden');
+                medicalFeatures.classList.add('hidden');
+            });
+
+            medicalTab.addEventListener('click', () => {
+                currentMode = 'medical';
+                medicalTab.classList.add('tab-active');
+                medicalTab.classList.remove('tab-inactive');
+                idTab.classList.remove('tab-active');
+                idTab.classList.add('tab-inactive');
+                idFeatures.classList.add('hidden');
+                medicalFeatures.classList.remove('hidden');
+            });
+
+            // Bouton nouveau téléchargement
+            newUploadButton.addEventListener('click', () => {
+                resultsContainer.classList.add('hidden');
+                lastDetections = [];
+                translatedFields = false;
+                fileInput.value = '';
+            });
+
+            // Bouton de traduction
+            translateButton.addEventListener('click', () => {
+                if (lastDetections.length > 0) {
+                    const lang = languageSelector.value;
+                    updateDetectionLabels(lang);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

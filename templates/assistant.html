@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="last-modified" content="2025-05-06 02:27:59 UTC">
+    <title>Support Assistant - SafeNest</title>
+    
+    <!-- External CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --turquoise: #2A9D8F;
+            --deep-turquoise: #264653;
+            --sand: #E9C46A;
+            --soft-sand: #F4E9CD;
+            --gentle-green: #8AB17D;
+            --coral: #E76F51;
+            --light-turquoise: #83C5BE;
+            --cream: #FEFAE0;
+            --off-white: #FAF0E6;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+            background-color: var(--off-white);
+        }
+
+        .handwritten {
+            font-family: 'Caveat', cursive;
+        }
+
+        /* Logo Styles */
+        .logo {
+            position: relative;
+            width: 48px;
+            height: 48px;
+        }
+
+        .logo-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 35% 65% 60% 40% / 50% 50% 50% 50%;
+            background: var(--turquoise);
+            transform: rotate(-5deg);
+            transition: all 0.5s ease;
+        }
+
+        .logo-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: var(--deep-turquoise);
+            border-radius: 30% 70% 100% 0% / 0% 100% 0% 100%;
+            transform: rotate(-10deg) translateY(2px);
+        }
+
+        .logo-roof {
+            position: absolute;
+            top: 0;
+            left: 10%;
+            width: 80%;
+            height: 35%;
+            background: var(--sand);
+            clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+            transform: translateY(-15%);
+        }
+
+        /* Chatbot Styles */
+        .chatbot-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, var(--turquoise) 0%, var(--deep-turquoise) 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .chatbot-messages {
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--off-white);
+            scroll-behavior: smooth;
+        }
+
+        .chatbot-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chatbot-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chatbot-messages::-webkit-scrollbar-thumb {
+            background: var(--light-turquoise);
+            border-radius: 3px;
+        }
+
+        .chatbot-messages::-webkit-scrollbar-thumb:hover {
+            background: var(--turquoise);
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: messageAppear 0.3s ease forwards;
+        }
+
+        @keyframes messageAppear {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-content {
+            padding: 14px 18px;
+            border-radius: 15px;
+            max-width: 70%;
+            position: relative;
+            line-height: 1.5;
+            font-size: 15px;
+        }
+
+        .user-message .message-content {
+            background: var(--turquoise);
+            color: white;
+            border-radius: 15px 15px 0 15px;
+            box-shadow: 0 2px 5px rgba(42, 157, 143, 0.2);
+        }
+
+        .bot-message .message-content {
+            background: white;
+            color: var(--deep-turquoise);
+            border-radius: 15px 15px 15px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-message .message-avatar {
+            background: var(--deep-turquoise);
+        }
+
+        .bot-message .message-avatar {
+            background: var(--light-turquoise);
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            background: white;
+            border-radius: 15px;
+            width: fit-content;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            color: var(--deep-turquoise);
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        .typing-indicator i {
+            margin-right: 8px;
+            color: var(--turquoise);
+        }
+
+        .chatbot-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 12px;
+            position: relative;
+        }
+
+        .chatbot-input input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid var(--light-turquoise);
+            border-radius: 25px;
+            outline: none;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: var(--off-white);
+        }
+
+        .chatbot-input input:focus {
+            border-color: var(--turquoise);
+            box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.1);
+            background: white;
+        }
+
+        .chatbot-input button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: var(--turquoise);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .chatbot-input button:hover {
+            background: var(--deep-turquoise);
+            transform: scale(1.05);
+        }
+
+        .chatbot-input button:active {
+            transform: scale(0.95);
+        }
+
+        .chatbot-input button.recording {
+            background: var(--coral);
+            animation: pulse 1.5s infinite;
+            position: relative;
+        }
+
+        .chatbot-input button.recording::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--coral);
+            animation: ripple 1.5s infinite;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .play-message-btn {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: inherit;
+            opacity: 0.6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 4px;
+            border-radius: 50%;
+        }
+
+        .play-message-btn:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Styles for typing indicator dots */
+        .typing-dots {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--turquoise);
+            border-radius: 50%;
+            animation: dot-pulse 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes dot-pulse {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        /* Footer styling */
+        .footer-info {
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.8rem;
+            color: #666;
+            border-top: 1px solid #eee;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <nav class="py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="logo-container">
+                        <div class="logo">
+                            <div class="logo-base"></div>
+                            <div class="logo-wave"></div>
+                            <div class="logo-roof"></div>
+                        </div>
+                    </div>
+                    <div class="brand-name text-xl font-bold text-deep-turquoise">Safe<span class="text-turquoise">Nest</span></div>
+                </div>
+                <div class="flex space-x-8">
+                    <a href="/" class="nav-link font-medium text-gray-600 hover:text-turquoise transition-colors py-2">Home</a>
+                    <a href="/translation" class="nav-link font-medium text-gray-600 hover:text-turquoise transition-colors py-2">Translation</a>
+                    <a href="/assistant" class="nav-link active font-medium text-turquoise hover:text-turquoise transition-colors py-2">Assistant</a>
+                    <a href="/document_processing" class="nav-link font-medium text-gray-600 hover:text-turquoise transition-colors py-2">Documents</a>
+                    <a href="/resource_map" class="nav-link font-medium text-gray-600 hover:text-turquoise transition-colors py-2">Resources Map</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <select id="language-switcher" class="language-switcher font-medium text-sm focus:outline-none bg-gray-100 border border-gray-300 rounded-md py-1 px-2">
+                        <option value="en-GB">English</option>
+                        <option value="ar-SA">Arabic</option>
+                        <option value="fr-FR">French</option>
+                        <option value="so-SO">Somali</option>
+                        <option value="fa-IR">Persian</option>
+                    </select>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-deep-turquoise mb-4">Support Assistant</h1>
+                <p class="text-gray-600">Get instant help and answers to your questions about refugee services and support.</p>
+            </div>
+
+            <div class="chatbot-container">
+                <div class="chatbot-header">
+                    <i class="fas fa-robot text-2xl"></i>
+                    <h2 class="text-xl font-semibold">SafeNest Assistant</h2>
+                </div>
+
+                <div id="chat-messages" class="chatbot-messages">
+                    <div class="message bot-message">
+                        <div class="message-avatar">
+                            <i class="fas fa-robot text-white"></i>
+                        </div>
+                        <div class="message-content">
+                            Hello! I'm your SafeNest Assistant. How can I help you today?
+                            <button class="play-message-btn">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                
+
+                <form id="chat-form" class="chatbot-input">
+                    <input type="text" id="message-input" placeholder="Type your message here..." autocomplete="off">
+                    <button type="button" id="mic-button" title="Voice input">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button type="submit">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+            
+            <div class="footer-info mt-6">
+                <p>Current User: <span class="font-medium">Maryem-Jlassi</span> | Last Updated: <span class="font-medium">2025-05-06 02:27:59 UTC</span></p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageInput = document.getElementById('message-input');
+            const chatForm = document.getElementById('chat-form');
+            const micButton = document.getElementById('mic-button');
+            const typingIndicator = document.getElementById('typing-indicator');
+            const languageSwitcher = document.getElementById('language-switcher');
+
+            let isRecording = false;
+            let recognition = null;
+
+            // Initialize speech recognition
+            if ('webkitSpeechRecognition' in window) {
+                recognition = new webkitSpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = languageSwitcher.value;
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    messageInput.value = transcript;
+                    handleUserMessage(transcript);
+                };
+
+                recognition.onend = function() {
+                    isRecording = false;
+                    micButton.classList.remove('recording');
+                    micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+                };
+            }
+
+            // Language switcher event
+            languageSwitcher.addEventListener('change', function() {
+                if (recognition) {
+                    recognition.lang = this.value;
+                }
+            });
+
+            // Handle form submission
+            chatForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const message = messageInput.value.trim();
+                if (message) {
+                    handleUserMessage(message);
+                    messageInput.value = '';
+                }
+            });
+
+            // Handle microphone button
+            micButton.addEventListener('click', function() {
+                if (!recognition) {
+                    alert('Speech recognition is not supported in your browser.');
+                    return;
+                }
+
+                if (isRecording) {
+                    recognition.stop();
+                    micButton.classList.remove('recording');
+                    micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+                } else {
+                    recognition.start();
+                    isRecording = true;
+                    micButton.classList.add('recording');
+                    micButton.innerHTML = '<i class="fas fa-stop"></i>';
+                    
+                    // Add recording status message
+                    const statusMessage = document.createElement('div');
+                    statusMessage.className = 'message bot-message';
+                    statusMessage.innerHTML = `
+                        <div class="message-avatar">
+                            <i class="fas fa-robot text-white"></i>
+                        </div>
+                        <div class="message-content">
+                            Listening... Speak now
+                        </div>
+                    `;
+                    chatMessages.appendChild(statusMessage);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            });
+
+            // Update recognition events
+            if (recognition) {
+                recognition.onend = function() {
+                    isRecording = false;
+                    micButton.classList.remove('recording');
+                    micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+                    
+                    // Remove the listening message if it exists
+                    const listeningMessages = document.querySelectorAll('.message-content');
+                    listeningMessages.forEach(message => {
+                        if (message.textContent.includes('Listening...')) {
+                            message.parentElement.remove();
+                        }
+                    });
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    isRecording = false;
+                    micButton.classList.remove('recording');
+                    micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+                    
+                    // Add error message
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'message bot-message';
+                    errorMessage.innerHTML = `
+                        <div class="message-avatar">
+                            <i class="fas fa-robot text-white"></i>
+                        </div>
+                        <div class="message-content">
+                            Sorry, I couldn't hear you clearly. Please try again.
+                        </div>
+                    `;
+                    chatMessages.appendChild(errorMessage);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                };
+            }
+
+            // Handle user message
+            async function handleUserMessage(message) {
+                // Add user message to chat
+                addMessage(message, 'user');
+                
+                // Show typing indicator
+                typingIndicator.classList.remove('hidden');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                try {
+                    // Call the backend API to get a response from the LLM
+                    const response = await fetch('/generate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ query: message }),
+                    });
+                    
+                    const data = await response.json();
+                    
+                    // Hide typing indicator
+                    typingIndicator.classList.add('hidden');
+                    
+                    if (response.ok) {
+                        // Add bot response with the LLM-generated text
+                        addMessage(data.answer, 'bot');
+                        
+                        // Speak the message if needed
+                        speakMessage(data.answer);
+                    } else {
+                        throw new Error(data.error || 'Failed to get response');
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    
+                    // Hide typing indicator
+                    typingIndicator.classList.add('hidden');
+                    
+                    // Show error message
+                    addMessage("I'm sorry, I'm having trouble connecting right now. Please try again later.", 'bot');
+                }
+            }
+
+            // Add message to chat
+            function addMessage(message, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}-message`;
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar';
+                avatar.innerHTML = `<i class="fas fa-${sender === 'user' ? 'user' : 'robot'} text-white"></i>`;
+
+                const content = document.createElement('div');
+                content.className = 'message-content';
+                content.textContent = message;
+
+                if (sender === 'bot') {
+                    const playButton = document.createElement('button');
+                    playButton.className = 'play-message-btn';
+                    playButton.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    playButton.addEventListener('click', () => speakMessage(message));
+                    content.appendChild(playButton);
+                }
+
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(content);
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Text-to-speech functionality
+            function speakMessage(message) {
+                // Try using the backend API first
+                fetch('/text_to_speech', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        text: message,
+                        language: languageSwitcher.value
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.audio_url) {
+                        // Create and play audio element if we get an audio URL
+                        const audio = new Audio(data.audio_url);
+                        audio.play();
+                    } else {
+                        // Fall back to browser's speech synthesis
+                        fallbackSpeech(message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error with text-to-speech API:', error);
+                    fallbackSpeech(message);
+                });
+            }
+            
+            // Fallback to browser's speech synthesis
+            function fallbackSpeech(message) {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(message);
+                    utterance.lang = languageSwitcher.value;
+                    speechSynthesis.speak(utterance);
+                }
+            }
+        });
+        
+    </script>
+</body>
+</html>

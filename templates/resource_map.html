@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="last-modified" content="2025-05-06 10:00:00 UTC">
+    <title>Resource Map - SafeNest</title>
+    
+    <!-- External CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.Default.css">
+
+    <style>
+        :root {
+            --turquoise: #2A9D8F;
+            --deep-turquoise: #264653;
+            --sand: #E9C46A;
+            --soft-sand: #F4E9CD;
+            --gentle-green: #8AB17D;
+            --coral: #E76F51;
+            --light-turquoise: #83C5BE;
+            --cream: #FEFAE0;
+            --off-white: #FAF0E6;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+            background-color: var(--off-white);
+        }
+
+        .handwritten {
+            font-family: 'Caveat', cursive;
+        }
+
+        /* Logo Styles */
+        .logo {
+            position: relative;
+            width: 48px;
+            height: 48px;
+        }
+
+        .logo-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 35% 65% 60% 40% / 50% 50% 50% 50%;
+            background: var(--turquoise);
+            transform: rotate(-5deg);
+            transition: all 0.5s ease;
+        }
+
+        .logo-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: var(--deep-turquoise);
+            border-radius: 30% 70% 100% 0% / 0% 100% 0% 100%;
+            transform: rotate(-10deg) translateY(2px);
+        }
+
+        .logo-roof {
+            position: absolute;
+            top: 0;
+            left: 10%;
+            width: 80%;
+            height: 35%;
+            background: var(--sand);
+            clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+            transform: translateY(-15%);
+        }
+
+        /* Map Container */
+        .map-container {
+            position: relative;
+            height: calc(100vh - 80px);
+            width: 100%;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+            z-index: 1;
+        }
+
+        /* Sidebar */
+        .map-sidebar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 350px;
+            height: 100%;
+            background: white;
+            z-index: 2;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .map-sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            top: 20px;
+            left: 370px;
+            z-index: 3;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .sidebar-toggle.collapsed {
+            left: 20px;
+        }
+
+        /* Search Box */
+        .search-box {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid var(--light-turquoise);
+            border-radius: 25px;
+            outline: none;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--turquoise);
+            box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.1);
+        }
+
+        /* Filters */
+        .filters {
+            padding: 20px;
+        }
+
+        .filter-group {
+            margin-bottom: 20px;
+        }
+
+        .filter-group h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--deep-turquoise);
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filter-button {
+            padding: 8px 16px;
+            border: 2px solid var(--light-turquoise);
+            border-radius: 20px;
+            background: white;
+            color: var(--deep-turquoise);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-button:hover {
+            background: var(--light-turquoise);
+            color: white;
+        }
+
+        .filter-button.active {
+            background: var(--turquoise);
+            border-color: var(--turquoise);
+            color: white;
+        }
+
+        /* Distance Slider */
+        .distance-slider {
+            padding: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .distance-slider h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--deep-turquoise);
+        }
+
+        .slider-container {
+            position: relative;
+            padding: 10px 0;
+        }
+
+        .slider-container input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: var(--light-turquoise);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--turquoise);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .distance-value {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--deep-turquoise);
+        }
+
+        /* Location Button */
+        .location-button {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            z-index: 3;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .location-button:hover {
+            transform: scale(1.1);
+        }
+
+        .location-button i {
+            color: var(--turquoise);
+            font-size: 20px;
+        }
+
+        /* Resource List */
+        .resource-list {
+            padding: 20px;
+        }
+
+        .resource-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .resource-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .resource-item h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--deep-turquoise);
+        }
+
+        .resource-item p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .resource-item .distance {
+            font-size: 12px;
+            color: var(--turquoise);
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--light-turquoise);
+            border-top-color: var(--turquoise);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Custom Marker Styles */
+        .custom-marker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .marker-shelter { background: var(--turquoise); }
+        .marker-medical { background: var(--coral); }
+        .marker-food { background: var(--sand); }
+        .marker-education { background: var(--gentle-green); }
+        .marker-legal { background: var(--deep-turquoise); }
+
+        /* Current Location Marker */
+        .current-location-marker {
+            width: 20px;
+            height: 20px;
+            background: var(--turquoise);
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px var(--turquoise);
+        }
+
+        /* Distance Circle */
+        .distance-circle {
+            stroke: var(--turquoise);
+            stroke-width: 2;
+            fill-opacity: 0.1;
+            fill: var(--turquoise);
+            stroke-dasharray: 5, 5;
+        }
+
+        /* Add new styles for AI features */
+        .prediction-banner {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .prediction-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--deep-turquoise);
+            font-weight: 500;
+        }
+
+        .prediction-content i {
+            color: var(--turquoise);
+        }
+
+        .resource-item.predicted-category {
+            border-left: 4px solid var(--turquoise);
+            background: rgba(42, 157, 143, 0.05);
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translate(-50%, -100%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+
+        /* Error Banner Styles */
+        .error-banner {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff3f3;
+            padding: 12px 24px;
+            border-radius: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            animation: slideDown 0.3s ease-out;
+            border: 1px solid #ffcdd2;
+        }
+
+        .error-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #d32f2f;
+            font-weight: 500;
+        }
+
+        .error-content i {
+            color: #d32f2f;
+        }
+
+        .location-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .fa-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Add styles for improved markers and popups */
+        .marker-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border: 2px solid white;
+        }
+
+        .resource-popup {
+            max-width: 300px;
+        }
+
+        .popup-header {
+            padding: 10px;
+            color: white;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .popup-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .category-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .popup-content {
+            padding: 15px;
+        }
+
+        .info-section {
+            margin: 10px 0;
+        }
+
+        .info-section h4 {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .language-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .language-tag {
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .contact-info {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .contact-info p {
+            margin: 5px 0;
+            font-size: 13px;
+        }
+
+        .popup-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .action-button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            background: #f0f0f0;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .action-button:hover {
+            background: #e0e0e0;
+        }
+
+        /* Status message */
+        .status-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: 1px solid var(--turquoise);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            animation: slideDown 0.3s ease-out;
+            font-weight: 500;
+            color: var(--deep-turquoise);
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <nav class="py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="logo-container">
+                        <div class="logo">
+                            <div class="logo-base"></div>
+                            <div class="logo-wave"></div>
+                            <div class="logo-roof"></div>
+                        </div>
+                    </div>
+                    <div class="brand-name">Safe<span>Nest</span></div>
+                </div>
+                <div class="flex space-x-8">
+                    <a href="/" class="nav-link font-medium text-gray-600 hover:text-turquoise transition-colors py-2">Home</a>
+                    <a href="/translation" class="nav-link font-medium text-gray-600 hover:text-turquoise transition-colors py-2">Translation</a>
+                    <a href="/assistant" class="nav-link font-medium text-gray-600 hover:text-turquoise transition-colors py-2">Assistant</a>
+                    <a href="/document_processing" class="nav-link font-medium text-gray-600 hover:text-turquoise transition-colors py-2">Documents</a>
+                    <a href="/resource_map" class="nav-link active font-medium text-turquoise hover:text-turquoise transition-colors py-2">Resources Map</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <select id="language-switcher" class="language-switcher font-medium text-sm focus:outline-none">
+                        <option value="en-GB">English</option>
+                        <option value="ar-SA">Arabic</option>
+                        <option value="fr-FR">French</option>
+                        <option value="so-SO">Somali</option>
+                        <option value="fa-IR">Persian</option>
+                    </select>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="map-container">
+        <div id="map"></div>
+        
+        <div class="map-sidebar">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search resources...">
+            </div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <h3>Categories</h3>
+                    <div class="filter-buttons">
+                        <button class="filter-button active" data-category="all">All</button>
+                        <button class="filter-button" data-category="shelter">Shelter</button>
+                        <button class="filter-button" data-category="medical">Medical</button>
+                        <button class="filter-button" data-category="food">Food</button>
+                        <button class="filter-button" data-category="education">Education</button>
+                        <button class="filter-button" data-category="legal">Legal</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="distance-slider">
+                <h3>Distance</h3>
+                <div class="slider-container">
+                    <input type="range" id="distance-slider" min="1" max="50" value="10" step="1">
+                    <div class="distance-value">10 km</div>
+                </div>
+            </div>
+
+            <div class="resource-list" id="resource-list">
+                <!-- Resource items will be dynamically added here -->
+                <div class="text-center text-gray-500 py-8">
+                    Search for resources or enable location to see nearby services
+                </div>
+            </div>
+        </div>
+
+        <button class="sidebar-toggle" id="sidebar-toggle">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <button class="location-button" id="location-button" title="Find my location">
+            <i class="fas fa-location-arrow"></i>
+        </button>
+    </div>
+
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- External JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show loading overlay
+            const loadingOverlay = document.getElementById('loading-overlay');
+            
+            // Initialize map
+            const map = L.map('map').setView([51.505, -0.09], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Initialize marker cluster group
+            const markers = L.markerClusterGroup();
+            map.addLayer(markers);
+
+            // Store resources and current location
+            let resources = [];
+            let currentLocation = null;
+            let currentLocationMarker = null;
+            let distanceCircle = null;
+            let activeCategory = 'all'; // Track active category filter
+
+            // Categories with colors and icons
+            const categories = {
+                shelter: { 
+                    color: '#2A9D8F', 
+                    icon: 'fa-home',
+                    label: 'Shelter & Housing',
+                    description: 'Emergency housing and accommodation services'
+                },
+                medical: { 
+                    color: '#E76F51', 
+                    icon: 'fa-hospital',
+                    label: 'Medical Centers',
+                    description: 'Healthcare facilities and medical services'
+                },
+                food: { 
+                    color: '#E9C46A', 
+                    icon: 'fa-utensils',
+                    label: 'Food Assistance',
+                    description: 'Food banks and meal services'
+                },
+                education: { 
+                    color: '#8AB17D', 
+                    icon: 'fa-graduation-cap',
+                    label: 'Education',
+                    description: 'Schools, language classes, and educational resources'
+                },
+                legal: { 
+                    color: '#264653', 
+                    icon: 'fa-balance-scale',
+                    label: 'Legal Support',
+                    description: 'Legal aid and immigration services'
+                }
+            };
+
+            // Sample resources with more detailed information
+            const sampleResources = [
+                {
+                    id: 1,
+                    name: "Refugee Shelter Center",
+                    category: "shelter",
+                    description: "Emergency housing and support services",
+                    location: [51.505, -0.09],
+                    address: "123 Main St, London",
+                    phone: "+44 123 456 7890",
+                    hours: "24/7",
+                    services: ["Emergency housing", "Basic supplies", "Showers", "Laundry"],
+                    languages: ["English", "Arabic", "French"],
+                    accessibility: ["Wheelchair accessible", "Family rooms available"]
+                },
+                {
+                    id: 2,
+                    name: "Community Health Clinic",
+                    category: "medical",
+                    description: "Free medical services for refugees",
+                    location: [51.51, -0.1],
+                    address: "456 Health Ave, London",
+                    phone: "+44 123 456 7891",
+                    hours: "Mon-Fri 9:00-17:00",
+                    services: ["Primary care", "Mental health", "Vaccinations", "Dental care"],
+                    languages: ["English", "Arabic", "Urdu", "Somali"],
+                    accessibility: ["Wheelchair accessible", "Translation services"]
+                },
+                {
+                    id: 3,
+                    name: "Food Bank Distribution",
+                    category: "food",
+                    description: "Food assistance and supplies",
+                    location: [51.515, -0.095],
+                    address: "789 Food St, London",
+                    phone: "+44 123 456 7892",
+                    hours: "Mon-Sat 10:00-16:00",
+                    services: ["Food packages", "Hot meals", "Baby supplies"],
+                    languages: ["English", "Arabic", "Farsi"],
+                    accessibility: ["Wheelchair accessible"]
+                },
+                {
+                    id: 4,
+                    name: "Community Learning Center",
+                    category: "education",
+                    description: "Language classes and educational support",
+                    location: [51.52, -0.085],
+                    address: "321 Education Rd, London",
+                    phone: "+44 123 456 7893",
+                    hours: "Mon-Fri 8:00-20:00",
+                    services: ["Language classes", "Computer skills", "Homework help"],
+                    languages: ["English", "Arabic", "French", "Spanish"],
+                    accessibility: ["Wheelchair accessible", "Childcare available"]
+                },
+                {
+                    id: 5,
+                    name: "Immigrant Legal Aid Society",
+                    category: "legal",
+                    description: "Free legal assistance for asylum seekers",
+                    location: [51.508, -0.105],
+                    address: "567 Justice Blvd, London",
+                    phone: "+44 123 456 7894",
+                    hours: "Mon-Fri 9:00-18:00",
+                    services: ["Asylum applications", "Residency advice", "Work permits", "Family reunification"],
+                    languages: ["English", "Arabic", "French", "Spanish", "Somali"],
+                    accessibility: ["Wheelchair accessible", "Translation services"]
+                },
+                {
+                    id: 6,
+                    name: "Emergency Women's Shelter",
+                    category: "shelter",
+                    description: "Safe housing for women and children",
+                    location: [51.5, -0.12],
+                    address: "214 Hope Lane, London",
+                    phone: "+44 123 456 7895",
+                    hours: "24/7",
+                    services: ["Emergency housing", "Safety planning", "Counseling", "Children's services"],
+                    languages: ["English", "Arabic", "Urdu", "French"],
+                    accessibility: ["Secure entrance", "Child-friendly spaces"]
+                },
+                {
+                    id: 7,
+                    name: "Urgent Care Medical Center",
+                    category: "medical",
+                    description: "Walk-in medical services",
+                    location: [51.495, -0.1],
+                    address: "890 Health St, London",
+                    phone: "+44 123 456 7896",
+                    hours: "Daily 8:00-22:00",
+                    services: ["Emergency care", "Prescriptions", "Vaccinations", "Basic testing"],
+                    languages: ["English", "Arabic", "Farsi", "Spanish"],
+                    accessibility: ["Wheelchair accessible", "Interpreters available"]
+                }
+            ];
+            
+            // Initialize resources
+            resources = sampleResources;
+            updateResourceMarkers(activeCategory);
+            updateResourceList(filterResources(activeCategory));
+
+            // Hide loading overlay
+            loadingOverlay.style.display = 'none';
+
+            // Sidebar toggle
+            const sidebar = document.querySelector('.map-sidebar');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                sidebarToggle.classList.toggle('collapsed');
+                sidebarToggle.querySelector('i').classList.toggle('fa-chevron-left');
+                sidebarToggle.querySelector('i').classList.toggle('fa-chevron-right');
+            });
+
+            // Location button functionality
+            // Location button functionality
+const locationButton = document.getElementById('location-button');
+            
+            locationButton.addEventListener('click', function() {
+                // Change button state to loading
+                locationButton.disabled = true;
+                locationButton.innerHTML = '<i class="fas fa-spinner"></i>';
+                
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        // Success callback
+                        function(position) {
+                            const latitude = position.coords.latitude;
+                            const longitude = position.coords.longitude;
+                            currentLocation = [latitude, longitude];
+                            
+                            // Center map on user location
+                            map.setView(currentLocation, 14);
+                            
+                            // Add or update marker for current location
+                            if (currentLocationMarker) {
+                                map.removeLayer(currentLocationMarker);
+                            }
+                            currentLocationMarker = L.circleMarker(currentLocation, {
+                                color: '#2A9D8F',
+                                fillColor: '#2A9D8F',
+                                fillOpacity: 0.8,
+                                radius: 8,
+                                weight: 2
+                            }).addTo(map);
+                            
+                            // Add or update distance circle
+                            const distanceValue = parseInt(document.getElementById('distance-slider').value);
+                            if (distanceCircle) {
+                                map.removeLayer(distanceCircle);
+                            }
+                            distanceCircle = L.circle(currentLocation, {
+                                radius: distanceValue * 1000, // Convert km to meters
+                                color: '#2A9D8F',
+                                fillColor: '#2A9D8F',
+                                fillOpacity: 0.1,
+                                weight: 1,
+                                dashArray: '5, 5'
+                            }).addTo(map);
+                            
+                            // Update resources with distance and filter by distance
+                            calculateResourceDistances();
+                            updateResourceList(filterResources(activeCategory));
+                            
+                            // Show success message
+                            showStatusMessage('Location found successfully');
+                            
+                            // Restore button state
+                            locationButton.disabled = false;
+                            locationButton.innerHTML = '<i class="fas fa-location-arrow"></i>';
+                        },
+                        // Error callback
+                        function(error) {
+                            let errorMessage = 'Unable to retrieve your location';
+                            switch(error.code) {
+                                case error.PERMISSION_DENIED:
+                                    errorMessage = 'Location access denied. Please enable location services.';
+                                    break;
+                                case error.POSITION_UNAVAILABLE:
+                                    errorMessage = 'Location information is unavailable.';
+                                    break;
+                                case error.TIMEOUT:
+                                    errorMessage = 'Location request timed out.';
+                                    break;
+                            }
+                            
+                            showErrorMessage(errorMessage);
+                            
+                            // Restore button state
+                            locationButton.disabled = false;
+                            locationButton.innerHTML = '<i class="fas fa-location-arrow"></i>';
+                        }
+                    );
+                } else {
+                    showErrorMessage('Geolocation is not supported by your browser');
+                    locationButton.disabled = false;
+                    locationButton.innerHTML = '<i class="fas fa-location-arrow"></i>';
+                }
+            });
+            
+            // Distance slider
+            const distanceSlider = document.getElementById('distance-slider');
+            const distanceValue = document.querySelector('.distance-value');
+            
+            distanceSlider.addEventListener('input', function() {
+                const value = this.value;
+                distanceValue.textContent = `${value} km`;
+                
+                // Update distance circle if current location is set
+                if (currentLocation && distanceCircle) {
+                    map.removeLayer(distanceCircle);
+                    distanceCircle = L.circle(currentLocation, {
+                        radius: value * 1000, // Convert km to meters
+                        color: '#2A9D8F',
+                        fillColor: '#2A9D8F',
+                        fillOpacity: 0.1,
+                        weight: 1,
+                        dashArray: '5, 5'
+                    }).addTo(map);
+                }
+                
+                // Update resource list based on new distance
+                updateResourceList(filterResources(activeCategory));
+            });
+            
+            // Category filter functionality
+            const filterButtons = document.querySelectorAll('.filter-button');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Update active state
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Filter resources
+                    activeCategory = this.dataset.category;
+                    updateResourceMarkers(activeCategory);
+                    updateResourceList(filterResources(activeCategory));
+                });
+            });
+            
+            // Search functionality
+            const searchInput = document.getElementById('search-input');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                updateResourceList(filterResources(activeCategory, searchTerm));
+            });
+            
+            // Function to create resource markers
+            function updateResourceMarkers(category = 'all') {
+                // Clear existing markers
+                markers.clearLayers();
+                
+                // Filter resources by category if needed
+                let filteredResources = resources;
+                if (category !== 'all') {
+                    filteredResources = resources.filter(resource => resource.category === category);
+                }
+                
+                // Add markers for each resource
+                filteredResources.forEach(resource => {
+                    const resourceCategory = resource.category;
+                    const categoryInfo = categories[resourceCategory];
+                    
+                    // Create custom marker
+                    const markerIcon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div class="marker-container" style="background-color: ${categoryInfo.color}">
+                                <i class="fas ${categoryInfo.icon}"></i>
+                              </div>`,
+                        iconSize: [40, 40],
+                        iconAnchor: [20, 20]
+                    });
+                    
+                    const marker = L.marker(resource.location, { icon: markerIcon });
+                    
+                    // Create popup content
+                    const popupContent = `
+                        <div class="resource-popup">
+                            <div class="popup-header" style="background-color: ${categoryInfo.color}">
+                                <div class="category-label">${categoryInfo.label}</div>
+                                <h3>${resource.name}</h3>
+                            </div>
+                            <div class="popup-content">
+                                <p>${resource.description}</p>
+                                
+                                <div class="info-section">
+                                    <h4>Services</h4>
+                                    <p>${resource.services.join(', ')}</p>
+                                </div>
+                                
+                                <div class="info-section">
+                                    <h4>Languages</h4>
+                                    <div class="language-tags">
+                                        ${resource.languages.map(lang => `<span class="language-tag">${lang}</span>`).join('')}
+                                    </div>
+                                </div>
+                                
+                                <div class="contact-info">
+                                    <p><i class="fas fa-map-marker-alt"></i> ${resource.address}</p>
+                                    <p><i class="fas fa-phone"></i> ${resource.phone}</p>
+                                    <p><i class="fas fa-clock"></i> ${resource.hours}</p>
+                                </div>
+                                
+                                <div class="popup-actions">
+                                    <button class="action-button" onclick="window.open('https://maps.google.com/maps?q=${resource.location[0]},${resource.location[1]}', '_blank')">
+                                        <i class="fas fa-directions"></i> Directions
+                                    </button>
+                                    <button class="action-button" onclick="window.open('tel:${resource.phone.replace(/\s/g, '')}')">
+                                        <i class="fas fa-phone"></i> Call
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    marker.bindPopup(popupContent, {
+                        maxWidth: 300,
+                        className: 'resource-popup-container'
+                    });
+                    
+                    markers.addLayer(marker);
+                });
+            }
+            
+            // Function to calculate distance between user location and resources
+            function calculateResourceDistances() {
+                if (!currentLocation) return;
+                
+                resources.forEach(resource => {
+                    // Haversine formula for distance calculation
+                    const R = 6371; // Earth's radius in km
+                    const lat1 = currentLocation[0] * Math.PI / 180;
+                    const lat2 = resource.location[0] * Math.PI / 180;
+                    const deltaLat = (resource.location[0] - currentLocation[0]) * Math.PI / 180;
+                    const deltaLon = (resource.location[1] - currentLocation[1]) * Math.PI / 180;
+                    
+                    const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
+                              Math.cos(lat1) * Math.cos(lat2) * 
+                              Math.sin(deltaLon/2) * Math.sin(deltaLon/2);
+                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                    const distance = R * c;
+                    
+                    // Add distance to resource object
+                    resource.distance = distance.toFixed(1);
+                });
+            }
+            
+            // Function to filter resources by category and distance
+            function filterResources(category = 'all', searchTerm = '') {
+                let filteredResources = resources;
+                
+                // Filter by category if not "all"
+                if (category !== 'all') {
+                    filteredResources = filteredResources.filter(resource => resource.category === category);
+                }
+                
+                // Filter by search term if provided
+                if (searchTerm) {
+                    filteredResources = filteredResources.filter(resource => 
+                        resource.name.toLowerCase().includes(searchTerm) || 
+                        resource.description.toLowerCase().includes(searchTerm) ||
+                        resource.services.some(service => service.toLowerCase().includes(searchTerm))
+                    );
+                }
+                
+                // Filter by distance if current location is set
+                if (currentLocation) {
+                    const maxDistance = parseInt(distanceSlider.value);
+                    filteredResources = filteredResources.filter(resource => 
+                        parseFloat(resource.distance) <= maxDistance
+                    );
+                    
+                    // Sort by distance
+                    filteredResources.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+                }
+                
+                return filteredResources;
+            }
+            
+            // Function to update resource list in sidebar
+            function updateResourceList(filteredResources) {
+                const resourceList = document.getElementById('resource-list');
+                
+                // Clear existing content
+                resourceList.innerHTML = '';
+                
+                if (filteredResources.length === 0) {
+                    resourceList.innerHTML = `
+                        <div class="text-center text-gray-500 py-8">
+                            No resources found matching your criteria
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Add resources to list
+                filteredResources.forEach(resource => {
+                    const resourceCategory = resource.category;
+                    const categoryInfo = categories[resourceCategory];
+                    
+                    const resourceItem = document.createElement('div');
+                    resourceItem.className = 'resource-item';
+                    resourceItem.dataset.id = resource.id;
+                    
+                    resourceItem.innerHTML = `
+                        <h3>${resource.name}</h3>
+                        <p class="category" style="color: ${categoryInfo.color}">
+                            <i class="fas ${categoryInfo.icon}"></i> ${categoryInfo.label}
+                        </p>
+                        <p>${resource.description}</p>
+                        ${resource.distance ? `<p class="distance"><i class="fas fa-map-marker-alt"></i> ${resource.distance} km away</p>` : ''}
+                    `;
+                    
+                    // Add click event to center map on resource
+                    resourceItem.addEventListener('click', function() {
+                        // Center map on resource
+                        map.setView(resource.location, 16);
+                        
+                        // Find and open the marker popup
+                        markers.eachLayer(function(layer) {
+                            const latLng = layer.getLatLng();
+                            if (latLng.lat === resource.location[0] && latLng.lng === resource.location[1]) {
+                                layer.openPopup();
+                            }
+                        });
+                    });
+                    
+                    resourceList.appendChild(resourceItem);
+                });
+            }
+            
+            // Function to show error message
+            function showErrorMessage(message) {
+                // Create error banner
+                const errorBanner = document.createElement('div');
+                errorBanner.className = 'error-banner';
+                errorBanner.innerHTML = `
+                    <div class="error-content">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                // Add to document
+                document.body.appendChild(errorBanner);
+                
+                // Remove after 5 seconds
+                setTimeout(() => {
+                    errorBanner.style.opacity = '0';
+                    setTimeout(() => {
+                        document.body.removeChild(errorBanner);
+                    }, 300);
+                }, 5000);
+            }
+            
+            // Function to show status message
+            function showStatusMessage(message) {
+                // Create status message
+                const statusMessage = document.createElement('div');
+                statusMessage.className = 'status-message';
+                statusMessage.innerHTML = `
+                    <i class="fas fa-info-circle"></i>
+                    <span>${message}</span>
+                `;
+                
+                // Add to document
+                document.body.appendChild(statusMessage);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    statusMessage.style.opacity = '0';
+                    setTimeout(() => {
+                        document.body.removeChild(statusMessage);
+                    }, 300);
+                }, 3000);
+            }
+            
+            // Function to show resource details modal
+            function showResourceDetails(resource) {
+                const categoryInfo = categories[resource.category];
+                
+                // Create modal
+                const modal = document.createElement('div');
+                modal.className = 'modal-backdrop';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header" style="background-color: ${categoryInfo.color}; color: white;">
+                            <h2>${resource.name}</h2>
+                            <button class="close-button">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <p>${resource.description}</p>
+                            
+                            <div class="info-section">
+                                <h4>Services</h4>
+                                <ul>
+                                    ${resource.services.map(service => `<li>${service}</li>`).join('')}
+                                </ul>
+                            </div>
+                            
+                            <div class="info-section">
+                                <h4>Languages</h4>
+                                <div class="language-tags">
+                                    ${resource.languages.map(lang => `<span class="language-tag">${lang}</span>`).join('')}
+                                </div>
+                            </div>
+                            
+                            <div class="info-section">
+                                <h4>Accessibility</h4>
+                                <ul>
+                                    ${resource.accessibility.map(access => `<li>${access}</li>`).join('')}
+                                </ul>
+                            </div>
+                            
+                            <div class="contact-info">
+                                <p><i class="fas fa-map-marker-alt"></i> ${resource.address}</p>
+                                <p><i class="fas fa-phone"></i> ${resource.phone}</p>
+                                <p><i class="fas fa-clock"></i> ${resource.hours}</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="action-button" onclick="window.open('https://maps.google.com/maps?q=${resource.location[0]},${resource.location[1]}', '_blank')">
+                                <i class="fas fa-directions"></i> Get Directions
+                            </button>
+                            <button class="action-button" onclick="window.open('tel:${resource.phone.replace(/\s/g, '')}')">
+                                <i class="fas fa-phone"></i> Call
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Add to document
+                document.body.appendChild(modal);
+                
+                // Close button functionality
+                modal.querySelector('.close-button').addEventListener('click', function() {
+                    document.body.removeChild(modal);
+                });
+                
+                // Close on click outside modal content
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        document.body.removeChild(modal);
+                    }
+                });
+            }
+            
+            // Add AI-based prediction features
+            function predictNeededResources() {
+                // This would connect to a backend API for real AI predictions
+                // For demo purposes, we'll simulate a recommendation
+                
+                setTimeout(() => {
+                    const predictedCategory = "shelter";
+                    
+                    // Show prediction banner
+                    const predictionBanner = document.createElement('div');
+                    predictionBanner.className = 'prediction-banner';
+                    predictionBanner.innerHTML = `
+                        <div class="prediction-content">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Based on your profile, we recommend checking shelter resources</span>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(predictionBanner);
+                    
+                    // Highlight predicted category resources
+                    document.querySelectorAll(`.resource-item[data-category="${predictedCategory}"]`).forEach(item => {
+                        item.classList.add('predicted-category');
+                    });
+                    
+                    // Remove after 8 seconds
+                    setTimeout(() => {
+                        predictionBanner.style.opacity = '0';
+                        setTimeout(() => {
+                            document.body.removeChild(predictionBanner);
+                        }, 300);
+                    }, 8000);
+                }, 5000);
+            }
+            
+            // Initialize with some map bounds containing all resources
+            function initializeMapBounds() {
+                if (resources.length > 0) {
+                    const bounds = L.latLngBounds(resources.map(r => r.location));
+                    map.fitBounds(bounds);
+                }
+            }
+            
+            // Language switcher functionality
+            const languageSwitcher = document.getElementById('language-switcher');
+            languageSwitcher.addEventListener('change', function() {
+                const language = this.value;
+                showStatusMessage(`Language changed to ${languageSwitcher.options[languageSwitcher.selectedIndex].text}`);
+                // In a real app, this would trigger translation of the UI
+            });
+            
+            // Initialize map with all resources
+            initializeMapBounds();
+            
+            // Simulate AI prediction after a delay
+            setTimeout(predictNeededResources, 3000);
+            </script>
+    </body>
+</html>
