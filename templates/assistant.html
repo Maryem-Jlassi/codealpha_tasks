@@ -6,7 +6,6 @@
     <meta name="last-modified" content="2025-05-06 02:27:59 UTC">
     <title>Support Assistant - SafeNest</title>
     
-    <!-- External CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
@@ -34,7 +33,6 @@
             font-family: 'Caveat', cursive;
         }
 
-        /* Logo Styles */
         .logo {
             position: relative;
             width: 48px;
@@ -73,7 +71,6 @@
             transform: translateY(-15%);
         }
 
-        /* Chatbot Styles */
         .chatbot-container {
             background: white;
             border-radius: 20px;
@@ -297,7 +294,6 @@
             background: rgba(255, 255, 255, 0.1);
         }
         
-        /* Styles for typing indicator dots */
         .typing-dots {
             display: flex;
             align-items: center;
@@ -333,7 +329,6 @@
             }
         }
         
-        /* Footer styling */
         .footer-info {
             text-align: center;
             padding: 1rem;
@@ -436,7 +431,6 @@
             let isRecording = false;
             let recognition = null;
 
-            // Initialize speech recognition
             if ('webkitSpeechRecognition' in window) {
                 recognition = new webkitSpeechRecognition();
                 recognition.continuous = false;
@@ -456,14 +450,12 @@
                 };
             }
 
-            // Language switcher event
             languageSwitcher.addEventListener('change', function() {
                 if (recognition) {
                     recognition.lang = this.value;
                 }
             });
 
-            // Handle form submission
             chatForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const message = messageInput.value.trim();
@@ -473,7 +465,6 @@
                 }
             });
 
-            // Handle microphone button
             micButton.addEventListener('click', function() {
                 if (!recognition) {
                     alert('Speech recognition is not supported in your browser.');
@@ -490,7 +481,6 @@
                     micButton.classList.add('recording');
                     micButton.innerHTML = '<i class="fas fa-stop"></i>';
                     
-                    // Add recording status message
                     const statusMessage = document.createElement('div');
                     statusMessage.className = 'message bot-message';
                     statusMessage.innerHTML = `
@@ -506,14 +496,12 @@
                 }
             });
 
-            // Update recognition events
             if (recognition) {
                 recognition.onend = function() {
                     isRecording = false;
                     micButton.classList.remove('recording');
                     micButton.innerHTML = '<i class="fas fa-microphone"></i>';
                     
-                    // Remove the listening message if it exists
                     const listeningMessages = document.querySelectorAll('.message-content');
                     listeningMessages.forEach(message => {
                         if (message.textContent.includes('Listening...')) {
@@ -528,7 +516,6 @@
                     micButton.classList.remove('recording');
                     micButton.innerHTML = '<i class="fas fa-microphone"></i>';
                     
-                    // Add error message
                     const errorMessage = document.createElement('div');
                     errorMessage.className = 'message bot-message';
                     errorMessage.innerHTML = `
@@ -544,17 +531,13 @@
                 };
             }
 
-            // Handle user message
             async function handleUserMessage(message) {
-                // Add user message to chat
                 addMessage(message, 'user');
                 
-                // Show typing indicator
                 typingIndicator.classList.remove('hidden');
                 chatMessages.scrollTop = chatMessages.scrollHeight;
 
                 try {
-                    // Call the backend API to get a response from the LLM
                     const response = await fetch('/generate', {
                         method: 'POST',
                         headers: {
@@ -565,14 +548,11 @@
                     
                     const data = await response.json();
                     
-                    // Hide typing indicator
                     typingIndicator.classList.add('hidden');
                     
                     if (response.ok) {
-                        // Add bot response with the LLM-generated text
                         addMessage(data.answer, 'bot');
                         
-                        // Speak the message if needed
                         speakMessage(data.answer);
                     } else {
                         throw new Error(data.error || 'Failed to get response');
@@ -580,15 +560,12 @@
                 } catch (error) {
                     console.error("Error:", error);
                     
-                    // Hide typing indicator
                     typingIndicator.classList.add('hidden');
                     
-                    // Show error message
                     addMessage("I'm sorry, I'm having trouble connecting right now. Please try again later.", 'bot');
                 }
             }
 
-            // Add message to chat
             function addMessage(message, sender) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${sender}-message`;
@@ -615,9 +592,7 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
 
-            // Text-to-speech functionality
             function speakMessage(message) {
-                // Try using the backend API first
                 fetch('/text_to_speech', {
                     method: 'POST',
                     headers: {
@@ -631,11 +606,9 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.audio_url) {
-                        // Create and play audio element if we get an audio URL
                         const audio = new Audio(data.audio_url);
                         audio.play();
                     } else {
-                        // Fall back to browser's speech synthesis
                         fallbackSpeech(message);
                     }
                 })
@@ -645,7 +618,6 @@
                 });
             }
             
-            // Fallback to browser's speech synthesis
             function fallbackSpeech(message) {
                 if ('speechSynthesis' in window) {
                     const utterance = new SpeechSynthesisUtterance(message);
