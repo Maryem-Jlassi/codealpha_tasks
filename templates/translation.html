@@ -27,7 +27,6 @@
             background-color: var(--off-white);
         }
 
-        /* Logo styles */
         .logo {
             position: relative;
             width: 48px;
@@ -66,7 +65,6 @@
             transform: translateY(-15%);
         }
 
-        /* Glass effect and cards */
         .glass-effect {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -84,7 +82,6 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
-        /* Button styles */
         .primary-button {
             background: linear-gradient(135deg, var(--turquoise) 0%, var(--deep-turquoise) 100%);
             transition: all 0.3s ease;
@@ -107,7 +104,6 @@
             transform: translateX(200%);
         }
 
-        /* Animations */
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
@@ -117,7 +113,6 @@
             animation: float 6s ease-in-out infinite;
         }
 
-        /* Voice wave animation */
         .voice-wave {
             display: flex;
             align-items: center;
@@ -137,7 +132,6 @@
             50% { transform: scaleY(1.5); }
         }
 
-        /* Custom scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
         }
@@ -155,7 +149,6 @@
             background: var(--turquoise);
         }
 
-        /* Loading animation */
         .loading-dot {
             width: 8px;
             height: 8px;
@@ -169,7 +162,6 @@
             50% { transform: scale(1.2); opacity: 1; }
         }
 
-        /* Translation loading indicator */
         .translation-loading {
             display: none;
             align-items: center;
@@ -205,7 +197,6 @@
             40% { transform: scale(1); }
         }
         
-        /* User welcome bar */
         .user-welcome {
             background: linear-gradient(to right, var(--deep-turquoise), var(--turquoise));
             color: white;
@@ -213,7 +204,6 @@
             font-size: 0.85rem;
         }
         
-        /* Recent translation card */
         .recent-translation-card {
             transition: all 0.3s ease;
             border-left: 3px solid var(--turquoise);
@@ -224,7 +214,6 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
         
-        /* Delayed loading dots */
         .delay-0 {
             animation-delay: 0s;
         }
@@ -237,7 +226,6 @@
             animation-delay: 0.3s;
         }
         
-        /* Error message */
         .error-message {
             background-color: rgba(231, 111, 81, 0.1);
             border-left: 3px solid var(--coral);
@@ -258,7 +246,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Audio player styles */
         .audio-player {
             display: none;
             margin-top: 0.75rem;
@@ -271,7 +258,6 @@
             display: block;
         }
         
-        /* Language pair badge */
         .language-pair {
             background-color: var(--soft-sand);
             border-radius: 1rem;
@@ -286,11 +272,9 @@
     </style>
 </head>
 <body class="min-h-screen bg-off-white">
-    <!-- Navigation -->
     <nav class="bg-white shadow-md">
         <div class="container mx-auto px-6 py-4">
             <div class="flex justify-between items-center">
-                <!-- Logo -->
                 <div class="flex items-center space-x-3">
                     <div class="logo-container">
                         <div class="logo">
@@ -302,7 +286,6 @@
                     <div class="text-xl font-bold text-deep-turquoise">Safe<span class="text-turquoise">Nest</span></div>
                 </div>
 
-                <!-- Navigation Links -->
                 <div class="flex space-x-8">
                     <a href="/" class="nav-link text-gray-600 hover:text-turquoise transition-colors">Home</a>
                     <a href="/translation" class="nav-link text-turquoise border-b-2 border-turquoise">Translation</a>
@@ -311,7 +294,6 @@
                     <a href="/resource_map" class="nav-link text-gray-600 hover:text-turquoise transition-colors">Resource Map</a>
                 </div>
 
-                <!-- Language Selector -->
                 <select id="interfaceLanguage" class="bg-cream text-deep-turquoise px-4 py-2 rounded-lg border-2 border-transparent hover:border-turquoise focus:border-turquoise focus:outline-none transition-all cursor-pointer">
                     <option value="en-GB">English</option>
                     <option value="fr-FR">Français</option>
@@ -334,9 +316,7 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
-        <!-- Hero Section -->
         <div class="text-center mb-12">
             <div class="inline-block mb-6">
                 <span class="bg-cream text-turquoise px-4 py-1 rounded-full text-sm font-medium">AI-Powered Translation</span>
@@ -347,9 +327,7 @@
             </p>
         </div>
 
-        <!-- Translation Interface -->
         <div class="glass-effect rounded-xl p-8 mb-12">
-            <!-- Language Selection -->
             <div class="flex flex-col md:flex-row items-center gap-6 mb-8">
                 <div class="w-full md:w-2/5">
                     <label class="block text-sm font-medium text-deep-turquoise mb-2">From:</label>
@@ -402,9 +380,7 @@
                 </div>
             </div>
 
-            <!-- Translation Areas -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Source Text -->
                 <div class="translation-card bg-white rounded-xl p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-semibold text-deep-turquoise">Source Text</h3>
@@ -435,7 +411,6 @@
                     </div>
                 </div>
 
-                <!-- Translation -->
                 <div class="translation-card bg-white rounded-xl p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-semibold text-deep-turquoise">Translation</h3>
@@ -484,7 +459,6 @@
                 </div>
             </div>
 
-            <!-- Translate Button -->
             <div class="flex justify-center mt-8">
                 <button id="translateBtn" class="primary-button text-white px-8 py-3 rounded-lg font-medium flex items-center gap-2">
                     <i class="fas fa-language"></i>
@@ -492,7 +466,6 @@
                 </button>
             </div>
 
-            <!-- Loading Indicator -->
             <div id="translationLoading" class="translation-loading justify-center">
                 <span>Translating</span>
                 <div class="dots">
@@ -503,7 +476,6 @@
             </div>
         </div>
 
-        <!-- Recent Translations -->
         <div class="glass-effect rounded-xl p-6">
             <h2 class="text-2xl font-bold text-deep-turquoise mb-6 flex items-center">
                 <i class="fas fa-history mr-3"></i>Recent Translations
@@ -516,7 +488,6 @@
             </div>
         </div>
         
-        <!-- Translation Tips -->
         <div class="bg-cream/50 rounded-xl p-6 mt-8">
             <h2 class="text-xl font-bold text-deep-turquoise mb-4 flex items-center">
                 <i class="fas fa-lightbulb mr-3 text-sand"></i>Translation Tips
@@ -538,7 +509,6 @@
         </div>
     </main>
     
-    <!-- Footer -->
     <footer class="bg-deep-turquoise text-white mt-16">
         <div class="container mx-auto px-6 py-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -615,7 +585,6 @@
         </div>
     </footer>
 
-    <!-- Voice Input Modal -->
     <div class="voice-modal fixed inset-0 z-50 hidden" id="voiceModal">
         <div class="absolute inset-0 bg-deep-turquoise/50 backdrop-filter backdrop-blur-sm"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4">
@@ -652,7 +621,6 @@
         </div>
     </div>
 
-    <!-- Loading Overlay -->
     <div class="loading-overlay fixed inset-0 z-40 hidden" id="loadingOverlay">
         <div class="absolute inset-0 bg-white/90 backdrop-filter backdrop-blur-sm"></div>
         <div class="absolute inset-0 flex items-center justify-center">
@@ -667,14 +635,12 @@
         </div>
     </div>
 
-    <!-- Help Button -->
     <div class="fixed bottom-6 right-6">
         <button id="helpButton" class="bg-turquoise hover:bg-deep-turquoise text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-all transform hover:scale-110">
             <i class="fas fa-question text-xl"></i>
         </button>
     </div>
 
-    <!-- Help Modal -->
     <div class="fixed inset-0 z-50 hidden" id="helpModal">
         <div class="absolute inset-0 bg-deep-turquoise/50 backdrop-filter backdrop-blur-sm"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4">
@@ -822,7 +788,6 @@
                     this.loadRecentTranslations();
                     this.setupSpeechRecognition();
                     
-                    // Check for session-based initial text if any
                     const initialText = sessionStorage.getItem('initialTranslationText');
                     if (initialText) {
                         this.elements.sourceText.value = initialText;
@@ -832,28 +797,23 @@
                 },
 
                 setupEventListeners() {
-                    // Source text input
                     this.elements.sourceText.addEventListener('input', () => {
                         this.updateCharacterCount();
                         this.toggleEmptyState();
                     });
 
-                    // Translate button
                     this.elements.translateButton.addEventListener('click', () => {
                         this.performTranslation();
                     });
 
-                    // Swap languages
                     this.elements.swapLanguages.addEventListener('click', () => {
                         this.swapLanguages();
                     });
 
-                    // Voice input
                     this.elements.voiceInput.addEventListener('click', () => {
                         this.startVoiceInput();
                     });
 
-                    // Copy buttons
                     this.elements.copySource.addEventListener('click', () => {
                         this.copyText(this.elements.sourceText);
                     });
@@ -862,12 +822,10 @@
                         this.copyText(this.elements.translatedText);
                     });
 
-                    // Clear source
                     this.elements.clearSource.addEventListener('click', () => {
                         this.clearSource();
                     });
 
-                    // Listen button
                     this.elements.listen.addEventListener('click', () => {
                         if (this.state.currentAudioUrl) {
                             this.elements.translationAudio.play();
@@ -876,12 +834,10 @@
                         }
                     });
 
-                    // Download button
                     this.elements.download.addEventListener('click', () => {
                         this.downloadTranslation();
                     });
                     
-                    // Help modal
                     this.elements.helpButton.addEventListener('click', () => {
                         this.elements.helpModal.classList.remove('hidden');
                     });
@@ -894,7 +850,6 @@
                         this.elements.helpModal.classList.add('hidden');
                     });
                     
-                    // Voice modal
                     this.elements.microphoneButton.addEventListener('click', () => {
                         if (!this.state.isRecording) {
                             this.startRecording();
@@ -911,7 +866,6 @@
                         this.confirmVoiceInput();
                     });
                     
-                    // Paste button
                     this.elements.pasteButton.addEventListener('click', () => {
                         navigator.clipboard.readText()
                             .then(text => {
@@ -925,15 +879,12 @@
                             });
                     });
                     
-                    // Audio player replay button
                     this.elements.replayAudio.addEventListener('click', () => {
                         this.elements.translationAudio.currentTime = 0;
                         this.elements.translationAudio.play();
                     });
                     
-                    // Also enable translation on enter key in text area
                     this.elements.sourceText.addEventListener('keydown', (e) => {
-                        // Check if Ctrl+Enter was pressed
                         if (e.ctrlKey && e.key === 'Enter') {
                             this.performTranslation();
                         }
@@ -984,23 +935,19 @@
                 },
 
                 performTranslation() {
-                    // Hide any previous error messages
                     this.hideSourceError();
                     this.hideTranslationError();
                     
-                    // Don't proceed if already translating
                     if (this.state.isTranslating) {
                         return;
                     }
                     
-                    // Check if there's text to translate
                     const sourceText = this.elements.sourceText.value.trim();
                     if (!sourceText) {
                         this.showSourceError('Please enter text to translate');
                         return;
                     }
                     
-                    // Check if the source and target languages are the same
                     const sourceLang = this.elements.sourceLanguage.value;
                     const targetLang = this.elements.targetLanguage.value;
                     
@@ -1009,20 +956,15 @@
                         return;
                     }
                     
-                    // Set translating state
                     this.state.isTranslating = true;
                     
-                    // Hide audio player if it's visible
                     this.elements.audioPlayer.classList.remove('active');
                     
-                    // Show loading indicator
                     this.elements.translationLoading.classList.add('active');
                     
-                    // Get language codes (only the first part before the hyphen, lowercase)
                     const sourceLangCode = sourceLang.split('-')[0].toLowerCase();
                     const targetLangCode = targetLang.split('-')[0].toLowerCase();
                     
-                    // Make an API call to translate the text
                     fetch('/translate', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1041,13 +983,10 @@
                         return response.json();
                     })
                     .then(data => {
-                        // Update translation field
                         this.elements.translatedText.value = data.translated_text;
                         
-                        // Hide empty state
                         this.elements.emptyState.style.display = 'none';
                         
-                        // Enable translation controls
                         this.elements.listen.disabled = false;
                         this.elements.listen.classList.remove('text-gray-400');
                         this.elements.listen.classList.add('text-turquoise');
@@ -1060,7 +999,6 @@
                         this.elements.download.classList.remove('text-gray-400');
                         this.elements.download.classList.add('text-turquoise');
                         
-                        // Set the audio URL if provided
                         if (data.audio_url) {
                             this.state.currentAudioUrl = data.audio_url;
                             this.elements.translationAudio.src = data.audio_url;
@@ -1070,23 +1008,17 @@
                             this.state.currentAudioUrl = null;
                         }
                         
-                        // Add to recent translations
                         this.addToRecentTranslations(sourceText, data.translated_text, sourceLang, targetLang);
                         
-                        // Reset state
                         this.state.isTranslating = false;
                         
-                        // Hide loading indicator
                         this.elements.translationLoading.classList.remove('active');
                     })
                     .catch(error => {
-                        // Show error message
                         this.showTranslationError(error.message);
                         
-                        // Reset state
                         this.state.isTranslating = false;
                         
-                        // Hide loading indicator
                         this.elements.translationLoading.classList.remove('active');
                     });
                 },
@@ -1095,14 +1027,12 @@
                     const count = this.elements.sourceText.value.length;
                     this.elements.characterCount.textContent = `${count} characters`;
                     
-                    // Warn if approaching character limit
                     if (count > this.config.maxCharacterLimit * 0.8) {
                         this.elements.characterCount.classList.add('text-coral');
                     } else {
                         this.elements.characterCount.classList.remove('text-coral');
                     }
                     
-                    // Show error if exceeding limit
                     if (count > this.config.maxCharacterLimit) {
                         this.showSourceError(`Text exceeds maximum character limit of ${this.config.maxCharacterLimit}`);
                     } else {
@@ -1122,11 +1052,9 @@
                     const sourceLang = this.elements.sourceLanguage.value;
                     const targetLang = this.elements.targetLanguage.value;
                     
-                    // Swap the language selections
                     this.elements.sourceLanguage.value = targetLang;
                     this.elements.targetLanguage.value = sourceLang;
                     
-                    // If there's translated text, swap that too
                     if (this.elements.translatedText.value) {
                         const sourceText = this.elements.sourceText.value;
                         this.elements.sourceText.value = this.elements.translatedText.value;
@@ -1134,13 +1062,11 @@
                         this.updateCharacterCount();
                     }
                     
-                    // Apply animation
                     this.elements.swapLanguages.classList.add('rotate-180');
                     setTimeout(() => {
                         this.elements.swapLanguages.classList.remove('rotate-180');
                     }, 300);
                     
-                    // Reset audio player
                     this.elements.audioPlayer.classList.remove('active');
                     this.state.currentAudioUrl = null;
                 },
@@ -1177,7 +1103,6 @@
                     this.updateCharacterCount();
                     this.elements.voiceModal.classList.add('hidden');
                     
-                    // Auto-translate if user confirms voice input
                     if (this.state.recordedText) {
                         this.performTranslation();
                     }
@@ -1189,7 +1114,6 @@
                     element.select();
                     document.execCommand('copy');
                     
-                    // Visual feedback
                     const button = element === this.elements.sourceText 
                         ? this.elements.copySource 
                         : this.elements.copyTranslation;
@@ -1203,7 +1127,6 @@
                         button.classList.remove('text-green-500');
                     }, 2000);
                     
-                    // Deselect the text
                     window.getSelection().removeAllRanges();
                 },
 
@@ -1211,15 +1134,12 @@
                     this.elements.sourceText.value = '';
                     this.updateCharacterCount();
                     
-                    // Clear translation as well
                     this.elements.translatedText.value = '';
                     this.toggleEmptyState();
                     
-                    // Hide audio player
                     this.elements.audioPlayer.classList.remove('active');
                     this.state.currentAudioUrl = null;
                     
-                    // Disable translation controls
                     this.elements.listen.disabled = true;
                     this.elements.listen.classList.add('text-gray-400');
                     this.elements.listen.classList.remove('text-turquoise');
@@ -1232,7 +1152,6 @@
                     this.elements.download.classList.add('text-gray-400');
                     this.elements.download.classList.remove('text-turquoise');
                     
-                    // Hide any error messages
                     this.hideSourceError();
                     this.hideTranslationError();
                 },
@@ -1240,15 +1159,12 @@
                 speakText(text, langCode) {
                     if (!text) return;
                     
-                    // First try to use the browser's speech synthesis
                     if ('speechSynthesis' in window) {
-                        // Stop any currently speaking synthesis
                         window.speechSynthesis.cancel();
                         
                         const utterance = new SpeechSynthesisUtterance(text);
                         utterance.lang = langCode.split('-')[0] || 'en';
                         
-                        // Visual feedback while speaking
                         this.elements.listen.innerHTML = '<i class="fas fa-volume-up fa-pulse"></i>';
                         
                         utterance.onend = () => {
@@ -1257,7 +1173,6 @@
                         
                         window.speechSynthesis.speak(utterance);
                     } else {
-                        // Fallback - use the API to generate speech
                         const langPart = langCode.split('-')[0].toLowerCase();
                         
                         fetch('/text_to_speech', {
@@ -1308,7 +1223,6 @@
                 },
 
                 loadRecentTranslations() {
-                    // In a real app, you would load this from localStorage or a database
                     const recentTranslations = localStorage.getItem('recentTranslations');
                     
                     if (recentTranslations) {
@@ -1327,18 +1241,14 @@
                         timestamp: new Date().toISOString()
                     };
                     
-                    // Add to the beginning of the array
                     this.state.recentTranslations.unshift(translation);
                     
-                    // Keep only the last 10 translations
                     if (this.state.recentTranslations.length > 10) {
                         this.state.recentTranslations = this.state.recentTranslations.slice(0, 10);
                     }
                     
-                                        // Save to localStorage
                                         localStorage.setItem('recentTranslations', JSON.stringify(this.state.recentTranslations));
                     
-                    // Update the UI
                     this.renderRecentTranslations();
                 },
 
@@ -1390,7 +1300,6 @@
                             <div class="text-xs text-gray-400">${new Date(translation.timestamp).toLocaleString()}</div>
                         `;
                         
-                        // Add event listeners for reuse and delete buttons
                         const reuseBtn = card.querySelector('button[title="Reuse"]');
                         const deleteBtn = card.querySelector('button[title="Delete"]');
                         
@@ -1410,23 +1319,18 @@
                     const translation = this.state.recentTranslations.find(t => t.id === id);
                     if (!translation) return;
                     
-                    // Set the source and target languages
                     this.elements.sourceLanguage.value = translation.sourceLang;
                     this.elements.targetLanguage.value = translation.targetLang;
                     
-                    // Set the source text
                     this.elements.sourceText.value = translation.sourceText;
                     this.updateCharacterCount();
                     
-                    // Set the translated text
                     this.elements.translatedText.value = translation.translatedText;
                     this.toggleEmptyState();
                     
-                    // Reset audio player
                     this.elements.audioPlayer.classList.remove('active');
                     this.state.currentAudioUrl = null;
                     
-                    // Enable translation controls
                     this.elements.listen.disabled = false;
                     this.elements.listen.classList.remove('text-gray-400');
                     this.elements.listen.classList.add('text-turquoise');
@@ -1439,7 +1343,6 @@
                     this.elements.download.classList.remove('text-gray-400');
                     this.elements.download.classList.add('text-turquoise');
                     
-                    // Scroll to the translation interface
                     window.scrollTo({
                         top: this.elements.sourceText.getBoundingClientRect().top + window.pageYOffset - 100,
                         behavior: 'smooth'
@@ -1449,10 +1352,8 @@
                 deleteTranslation(id) {
                     this.state.recentTranslations = this.state.recentTranslations.filter(t => t.id !== id);
                     
-                    // Save to localStorage
                     localStorage.setItem('recentTranslations', JSON.stringify(this.state.recentTranslations));
                     
-                    // Update the UI
                     this.renderRecentTranslations();
                 },
                 
@@ -1475,10 +1376,8 @@
                 }
             };
             
-            // Initialize the application
             TranslationApp.init();
             
-            // Set current user display
             const userWelcomeSpan = document.querySelector('.user-welcome span.font-medium');
             const footerUserInfo = document.querySelector('.mt-4.md\\:mt-0.text-xs.text-gray-400 span:nth-child(3)');
             
@@ -1490,7 +1389,6 @@
                 footerUserInfo.textContent = 'User: Maryem-Jlassi';
             }
             
-            // Set current date and time
             const currentDateTime = '2025-05-06 01:54:46';
             const userWelcomeDateTime = document.querySelector('.user-welcome div:last-child');
             const footerDateTime = document.querySelector('.mt-4.md\\:mt-0.text-xs.text-gray-400 span:first-child');
@@ -1503,13 +1401,11 @@
                 footerDateTime.textContent = `Last updated: ${currentDateTime} UTC`;
             }
             
-            // Add event listeners for wave bars animation
             const waveBars = document.querySelectorAll('.wave-bar');
             waveBars.forEach((bar, index) => {
                 bar.style.animationDelay = `${index * 0.1}s`;
             });
             
-            // Easter egg - add a special animation when clicking the logo multiple times
             const logo = document.querySelector('.logo');
             let logoClickCount = 0;
             
@@ -1528,12 +1424,10 @@
                 });
             }
             
-            // Language pair compatibility check
             function checkLanguageCompatibility() {
                 const sourceLanguage = document.getElementById('sourceLanguage').value.split('-')[0].toLowerCase();
                 const targetLanguage = document.getElementById('targetLanguage').value.split('-')[0].toLowerCase();
                 
-                // List of language pairs that are known to work with the Helsinki-NLP models
                 const supportedPairs = [
                     'en-fr', 'fr-en',
                     'en-de', 'de-en',
@@ -1550,7 +1444,6 @@
                 const translateButton = document.getElementById('translateBtn');
                 
                 if (!supportedPairs.includes(pair) && sourceLanguage !== targetLanguage) {
-                    // Display a warning but don't disable the button
                     translateButton.title = "This language pair might have lower quality translations";
                     translateButton.classList.add('bg-opacity-90');
                 } else {
@@ -1559,11 +1452,9 @@
                 }
             }
             
-            // Monitor language selection changes
             document.getElementById('sourceLanguage').addEventListener('change', checkLanguageCompatibility);
             document.getElementById('targetLanguage').addEventListener('change', checkLanguageCompatibility);
             
-            // Initial check
             checkLanguageCompatibility();
         });
     </script>
