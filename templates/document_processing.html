@@ -176,7 +176,6 @@
     </main>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // DOM Elements
             const dropzone = document.getElementById('dropzone');
             const fileInput = document.getElementById('fileInput');
             const browseButton = document.getElementById('browseButton');
@@ -196,7 +195,6 @@
             const idFeatures = document.getElementById('idFeatures');
             const medicalFeatures = document.getElementById('medicalFeatures');
 
-            // Vérification des éléments requis
             const requiredElements = {
                 dropzone, fileInput, browseButton, resultsContainer, processingIndicator,
                 resultContent, resultImage, detectionsList, annotationContainer,
@@ -211,7 +209,6 @@
                 }
             }
 
-            // Variables globales
             let currentMode = 'id';
             let lastDetections = [];
             let translatedFields = false;
@@ -220,13 +217,11 @@
                 const file = fileInput.files[0];
                 if (!file) return;
                 
-                // Afficher l'indicateur de traitement
                 resultsContainer.classList.remove('hidden');
                 processingIndicator.classList.remove('hidden');
                 resultContent.classList.add('hidden');
                 errorContainer.innerHTML = '';
                 
-                // Validation du type de fichier
                 const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
                 if (!allowedTypes.includes(file.type)) {
                     processingIndicator.classList.add('hidden');
@@ -239,7 +234,6 @@
                     return;
                 }
                 
-                // Validation de la taille du fichier (16MB max)
                 if (file.size > 16 * 1024 * 1024) {
                     processingIndicator.classList.add('hidden');
                     errorContainer.innerHTML = `
@@ -251,7 +245,6 @@
                     return;
                 }
 
-                // Choix de l'endpoint selon le type de document
                 const endpoint = currentMode === 'medical' ? '/process_medical_document' : '/process_id_document';
                 console.log(`Mode actuel: ${currentMode}, Endpoint: ${endpoint}`);
                 
@@ -295,7 +288,6 @@
             }
 
             function displayResults(data) {
-                // Effacer les résultats précédents
                 detectionsList.innerHTML = '';
                 errorContainer.innerHTML = '';
                 
@@ -319,13 +311,10 @@
                     return;
                 }
                 
-                // Afficher le contenu des résultats
                 resultContent.classList.remove('hidden');
                 
-                // Stocker les détections pour la traduction
                 lastDetections = data.detections;
                 
-                // Afficher les détections
                 data.detections.forEach(detection => {
                     const li = document.createElement('li');
                     li.className = 'detection-item mb-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100';
@@ -363,7 +352,6 @@
                     detectionsList.appendChild(li);
                 });
                 
-                // Afficher l'image annotée si disponible
                 if (data.annotated_image) {
                     resultImage.src = data.annotated_image;
                 }
@@ -397,7 +385,6 @@
                 return translations[field] || field;
             }
 
-            // Event Listeners
             dropzone.addEventListener('click', () => fileInput.click());
             browseButton.addEventListener('click', (e) => { e.preventDefault(); fileInput.click(); });
             dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('active'); });
@@ -412,7 +399,6 @@
             });
             fileInput.addEventListener('change', handleFileUpload);
 
-            // Gestion des onglets
             idTab.addEventListener('click', () => {
                 currentMode = 'id';
                 idTab.classList.add('tab-active');
@@ -433,7 +419,6 @@
                 medicalFeatures.classList.remove('hidden');
             });
 
-            // Bouton nouveau téléchargement
             newUploadButton.addEventListener('click', () => {
                 resultsContainer.classList.add('hidden');
                 lastDetections = [];
@@ -441,7 +426,6 @@
                 fileInput.value = '';
             });
 
-            // Bouton de traduction
             translateButton.addEventListener('click', () => {
                 if (lastDetections.length > 0) {
                     const lang = languageSelector.value;
