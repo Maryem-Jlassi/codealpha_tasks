@@ -42,12 +42,13 @@
 ## Tech Stack 
  - *Frontend*: HTML, CSS, JavaScript
  - *Backend*: Django
- - *AI/NLP*: OLAMA 3.2, RAG -
- -  *Geolocation*: Map APIs -
- -   *Document Processing*: OCR + Expiry Detection
+ - *AI/NLP*: OLAMA 3.2, RAG 
+ - *Geolocation*: Map APIs 
+ - *Document Processing*: OCR + Expiry Detection
 ---
 ## Future work :
   -Upload and Translate : Refugees can upload scanned or photographed documents for automatic translation.
+  
   -User Feedback System : Refugees can rate translations to help improve the model's performance over time.
 
 ---
