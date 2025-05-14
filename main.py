@@ -8,19 +8,15 @@ from tasks.task2 import load_all_documents, create_faiss_index, retrieve_relevan
 
 app = Flask(__name__)
 
-# Define configuration
-app.config["UPLOAD_FOLDER"] = "uploads"  # Correct path for uploading files
-app.config["RESULTS_FOLDER"] = "results"  # Folder for results (annotated images)
-app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # Max file size: 16 MB
+app.config["UPLOAD_FOLDER"] = "uploads"  
+app.config["RESULTS_FOLDER"] = "results"  
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  
 
-# Ensure upload and results folders exist
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(app.config["RESULTS_FOLDER"], exist_ok=True)
 
-# Load YOLO model
-model = YOLO("model/card_detector.pt")  # Replace with your trained YOLO model path
+model = YOLO("model/card_detector.pt") 
 
-# Load knowledge base
 print("Chargement de la base de connaissances pour le chatbot...")
 all_chunks = load_all_documents()
 if not all_chunks:
@@ -58,7 +54,6 @@ def home():
 def document_processing():
     try:
         if request.method == "POST":
-            # Check if a file is provided in the request
             if "document" not in request.files:
                 return jsonify({"error": "Aucune image téléchargée."}), 400
 
@@ -66,26 +61,20 @@ def document_processing():
             if file.filename == "":
                 return jsonify({"error": "Nom de fichier vide."}), 400
 
-            # Save the uploaded file
             file_path = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
             file.save(file_path)
 
-            # Read the image using OpenCV
             img = cv2.imread(file_path)
             if img is None:
                 return jsonify({"error": "Impossible de lire l'image."}), 400
 
-            # Perform detection using YOLO model
             results = model(img)
 
-            # Annotate the image with detection results
             annotated_img = results[0].plot()
 
-            # Save the annotated image to the results folder
             result_path = os.path.join(app.config["RESULTS_FOLDER"], file.filename)
             cv2.imwrite(result_path, annotated_img)
 
-            # Extract detection data to include in the response
             detections = []
             for box in results[0].boxes.data.tolist():
                 x1, y1, x2, y2, confidence, class_id = box
@@ -96,7 +85,6 @@ def document_processing():
                     "box": [int(x1), int(y1), int(x2), int(y2)]
                 })
 
-            # Return the detection results and path to the annotated image
             return jsonify({
                 "detections": detections,
                 "annotated_image": f"/results/{file.filename}"
