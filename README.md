@@ -42,7 +42,7 @@
 ## Tech Stack 
  - *Frontend*: HTML, CSS, JavaScript
  - *Backend*: Django
- - *AI/NLP*: OLAMA 3.2, RAG 
+ - *AI/NLP*: OLLAMA: LLAMA3.2:latest + RAG 
  - *Geolocation*: Map APIs 
  - *Document Processing*: OCR + Expiry Detection
 ---
