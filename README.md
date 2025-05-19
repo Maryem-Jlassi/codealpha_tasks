@@ -6,7 +6,7 @@
 ## 🌍 Features
 
 - 🔤 **AI Translation** – Real-Time Translation Enables instant voice and text translation between Arabic and European languages to ease communication during medical visits, legal processes, or daily life.
-- 🤖 **Multilingual Virtual Assistant (Chatbot)** – A smart chatbot built using *RAG (Retrieval-Augmented Generation)* and the *OLAMA 3.2* model. It answers user queries in multiple languages and provides reliable, real-time assistance.
+- 🤖 **Multilingual Virtual Assistant (Chatbot)** – A smart chatbot built using *RAG (Retrieval-Augmented Generation)* and the *OLLAMA llama3.2:latest* model. It answers user queries in multiple languages and provides reliable, real-time assistance.
 - 🏥 Document Analysis & Expiry Detection Refugees can upload *ID cards* or *medical documents* to automatically extract key data like *expiry dates*, ensuring timely renewals.(used Yolo8 and fine tuned it with datasets of id cards and medical prescriptions )
 - 📍 **Location-Aware Support** – Interactive Localization Map Users can localize themselves on a map to find *nearby shelters*, *schools*, *medical centers*, and more essential services.
 - 🧡 **Accessible UI** – Human-centered design, clean interface for all literacy levels
